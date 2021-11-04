@@ -2,10 +2,8 @@
 	import "../node_modules/@picocss/pico/css/pico.min.css";
 	import { SvelteToast, toast } from '@zerodevx/svelte-toast';
 
-	// const ACTIONS_PATH = "http://localhost:3000/api/whitepapers";
-	// const UPDATE_URL = "http://localhost:3000/api/whitepaper";
-	const ACTIONS_PATH = "/api/whitepapers";
-	const UPDATE_URL = "/api/whitepaper";
+	const ACTIONS_PATH = `API_BASE_PATH/whitepapers`;
+	const UPDATE_URL = `API_BASE_PATH/whitepaper`;
 	const UNREAD_DATE = "0001-01-01T00:00:00Z";
 
 	// Sourcedata is the full list. filteredactions will hold the current results based on the filter
