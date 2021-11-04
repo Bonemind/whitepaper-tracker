@@ -1,6 +1,17 @@
 # AWS Whitepaper read tracker
+![example workflow](https://github.com/bonemind/whitepaper-tracker/actions/workflows/test-scrape.yml/badge.svg)
 
-Simple tracker that fetches a list of AWS whitepapers, and allows you to track when you read them.
+Simple tracker that fetches a list of AWS whitepapers, and allows you to track when you read them. Also keeps track of whether a paper has been updated since the last time you read it.
+
+The "Test whitepaper fetching" job is scheduled to run weekly and indicates that this project works as long as it passes.
+
+## Docker quickstart
+
+```shell
+sudo docker run -it --rm -p 3000:3000 -v $PWD:/data -e DB_LOCATION="/data/papers.db" ghcr.io/bonemind/whitepaper-tracker
+```
+
+Once this is running, navigate to `http://localhost:3000` to start using the app
 
 ## Usage
 
