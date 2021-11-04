@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// Schedule paper renewal on a daily basis
-	gocron.Every(1).Minute().Do(papers.LoadPapers, db)
+	gocron.Every(1).Day().Do(papers.LoadPapers, db)
 
 	log.Println("Starting gocron worker...")
 	gocron.Start()
