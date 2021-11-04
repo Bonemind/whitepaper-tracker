@@ -22,6 +22,7 @@ func NewController(db *gorm.DB) *PaperController {
 func (c *PaperController) ListWhitepapers(w http.ResponseWriter, r *http.Request) {
 	var papers []Paper
 	result := c.Db.Find(&papers)
+	log.Println("GET /api/whitepapers")
 
 	if result.Error != nil {
 		log.Fatalf("Error reading items from db: %v", result.Error)
@@ -48,6 +49,7 @@ type WhitepaperUpdateRequest struct {
 
 func (c *PaperController) UpdateWhitepaper(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
+		log.Println("OPTIONS /api/whitepaper")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Allow-Methods", "POST,GET")
@@ -60,7 +62,8 @@ func (c *PaperController) UpdateWhitepaper(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	//w.Write(js)
+	log.Println("POST /api/whitepaper")
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

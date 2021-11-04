@@ -7,6 +7,7 @@ import (
 	"whitepaper-tracker/fileserver"
 	"whitepaper-tracker/papers"
 
+	"github.com/jasonlvhit/gocron"
 	"github.com/namsral/flag"
 
 	"gorm.io/driver/sqlite"
@@ -53,6 +54,13 @@ func main() {
 
 		log.Println("Load done")
 	}
+
+	// Schedule paper renewal on a daily basis
+	gocron.Every(1).Minute().Do(papers.LoadPapers, db)
+
+	log.Println("Starting gocron worker...")
+	gocron.Start()
+	log.Println("Gocron worker started")
 
 	paperController := papers.NewController(db)
 

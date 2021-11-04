@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -74,6 +75,7 @@ type Response struct {
 func LoadPapers(db *gorm.DB) error {
 	totalCount := ITEMS_PER_PAGE * 2
 	fetchedItems := 0
+	log.Println("Started paper loading")
 
 	for i := 0; fetchedItems < totalCount; i++ {
 		var parsedResponse Response
@@ -123,6 +125,7 @@ func LoadPapers(db *gorm.DB) error {
 			}).Create(paper)
 		}
 	}
+	log.Printf("Done loading papers, fetched %d papers\n", fetchedItems)
 
 	return nil
 }

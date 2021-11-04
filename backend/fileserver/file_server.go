@@ -29,17 +29,17 @@ func ServeFrontend(w http.ResponseWriter, r *http.Request) {
 	}
 	basePath := path.Join(rootDir, FRONTEND_DIR)
 
-	log.Printf("Resolved '%s' as base path\n", basePath)
-
 	requestedPath := path.Join(basePath, path.Clean(r.URL.Path))
 
 	_, err = os.Stat(requestedPath)
 	if err == nil {
+		log.Printf("GET %s\n", requestedPath)
 		http.ServeFile(w, r, requestedPath)
 		return
 	} else if !os.IsNotExist(err) {
 		fmt.Println(fmt.Sprintf("Something is wrong, file does and doesn't exist: %v", err))
 	}
+	log.Printf("GET %s, rewriting to %s\n", requestedPath, path.Join(basePath, DEFAULT_OBJECT))
 	http.ServeFile(w, r, path.Join(basePath, DEFAULT_OBJECT))
 	return
 }
