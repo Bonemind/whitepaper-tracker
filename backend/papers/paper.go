@@ -16,4 +16,5 @@ type Paper struct {
 	Description   string
 	Url           string
 	Type          string
+	Title         string
 }

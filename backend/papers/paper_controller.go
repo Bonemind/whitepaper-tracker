@@ -34,6 +34,9 @@ func (c *PaperController) ListWhitepapers(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,GET")
 	w.Write(js)
 
 }
@@ -44,6 +47,14 @@ type WhitepaperUpdateRequest struct {
 }
 
 func (c *PaperController) UpdateWhitepaper(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "POST,GET")
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	if r.Method != "POST" {
 		http.Error(w, "Unsupported method", http.StatusMethodNotAllowed)
 		return
@@ -91,5 +102,8 @@ func (c *PaperController) UpdateWhitepaper(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,GET")
 	w.Write(js)
 }

@@ -1,19 +1,23 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"whitepaper-tracker/fileserver"
 	"whitepaper-tracker/papers"
 
+	"github.com/namsral/flag"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 func main() {
-	testMode := flag.Bool("test", false, "Whether to test if item fetch still works instead of starting the server")
+	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
+	testMode := flag.Bool("test_fetch", false, "Whether to test if item fetch still works instead of starting the server")
+	skipInitialLoad := flag.Bool("skipload", false, "Whether to skip the initial whitepaper load, useful for testing")
+	dbLocation := flag.String("db_location", "papers.db", "The location of the sqlite db")
 	serverPort := flag.Int("port", 3000, "Port to listen on")
 	flag.Parse()
 
@@ -30,7 +34,7 @@ func main() {
 		return
 	}
 
-	db, err := gorm.Open(sqlite.Open("whitepapers.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(*dbLocation), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalf("Error opening db: %v", err)
@@ -38,18 +42,22 @@ func main() {
 
 	db.AutoMigrate(&papers.Paper{})
 
-	// fmt.Println("Loading whitepapers")
-	// err = papers.LoadItems(db)
-	// if err != nil {
-	// 	log.Fatalf("Error loading items: %v", err)
-	// }
+	if *skipInitialLoad {
+		log.Println("Skipping initial load")
+	} else {
+		log.Println("Loading whitepapers")
+		err = papers.LoadPapers(db)
+		if err != nil {
+			log.Fatalf("Error loading items: %v", err)
+		}
 
-	// fmt.Println("Load done")
+		log.Println("Load done")
+	}
 
-	controller := papers.NewController(db)
+	paperController := papers.NewController(db)
 
-	http.HandleFunc("/api/whitepapers", controller.ListWhitepapers)
-	http.HandleFunc("/api/whitepaper", controller.UpdateWhitepaper)
+	http.HandleFunc("/api/whitepapers", paperController.ListWhitepapers)
+	http.HandleFunc("/api/whitepaper", paperController.UpdateWhitepaper)
 	http.HandleFunc("/", fileserver.ServeFrontend)
 	log.Printf("Starting server on port %d\n", *serverPort)
 	http.ListenAndServe(fmt.Sprintf(":%d", *serverPort), nil)

@@ -113,6 +113,7 @@ func LoadPapers(db *gorm.DB) error {
 				DateUpdated:   dateUpdated,
 				Url:           item.Item.AdditionalFields.PrimaryURL,
 				Type:          item.Item.AdditionalFields.ContentType,
+				Title:         item.Item.AdditionalFields.DocTitle,
 			}
 
 			// If a paper already exists, we want to update to a new url, and want to update the update date
