@@ -157,13 +157,13 @@ func main() {
 
 	db.AutoMigrate(&Paper{})
 
-	fmt.Println("Loading whitepapers")
-	err = loadItems(db)
-	if err != nil {
-		log.Fatalf("Error loading items: %v", err)
-	}
+	// fmt.Println("Loading whitepapers")
+	// err = loadItems(db)
+	// if err != nil {
+	// 	log.Fatalf("Error loading items: %v", err)
+	// }
 
-	fmt.Println("Load done")
+	// fmt.Println("Load done")
 
 	var papers []Paper
 	result := db.Find(&papers)
@@ -177,4 +177,95 @@ func main() {
 	for _, p := range papers {
 		fmt.Println(p.Name)
 	}
+
+	controller := NewController(db)
+
+	http.HandleFunc("/api/whitepapers", controller.listWhitepapers)
+	http.HandleFunc("/api/whitepaper", controller.updateWhitepaper)
+	http.ListenAndServe(":3000", nil)
+}
+
+type Controller struct {
+	Db *gorm.DB
+}
+
+func NewController(db *gorm.DB) *Controller {
+	return &Controller{Db: db}
+}
+
+func (c *Controller) listWhitepapers(w http.ResponseWriter, r *http.Request) {
+	var papers []Paper
+	result := c.Db.Find(&papers)
+
+	if result.Error != nil {
+		log.Fatalf("Error reading items from db: %v", result.Error)
+	}
+
+	fmt.Printf("Found %d papers", result.RowsAffected)
+
+	js, err := json.Marshal(papers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
+}
+
+type WhitepaperUpdateRequest struct {
+	Id   string
+	Read bool
+}
+
+func (c *Controller) updateWhitepaper(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Unsupported method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	//w.Write(js)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var wpr WhitepaperUpdateRequest
+	err = json.Unmarshal(body, &wpr)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error parsing body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	var paper Paper
+	result := c.Db.First(&paper, "id = ?", wpr.Id)
+
+	if result.RowsAffected == 0 {
+		http.Error(w, fmt.Sprintf("Paper not found: %v", result.Error), http.StatusNotFound)
+		return
+	}
+
+	if wpr.Read {
+		paper.DateRead = time.Now()
+	} else {
+		nilTime, _ := time.Parse(DATETIME_LAYOUT, "0001-01-01T00:00:00Z")
+		paper.DateRead = nilTime
+	}
+	result = c.Db.Save(paper)
+
+	if result.Error != nil {
+		http.Error(w, fmt.Sprintf("Error saving paper: %v", result.Error), http.StatusInternalServerError)
+		return
+	}
+
+	js, err := json.Marshal(paper)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
