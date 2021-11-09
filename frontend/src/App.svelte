@@ -13,7 +13,8 @@
 
 	let filters = {
 		Type: "all",
-		State: "all"
+		State: "all",
+		Liked: "all",
 	};
 
 	// Load the source iam list
@@ -30,8 +31,6 @@
 	}
 
 	function filterData() {
-		console.log("filtering");
-		console.log(filters);
 		let newFilteredData = sourceData;
 		if (filters.Type != "all") {
 			newFilteredData = newFilteredData.filter(p => p.Type == filters.Type);
@@ -48,6 +47,10 @@
 				console.log("Unknown filter for state, returning all");
 				return true;
 			});
+		}
+		if (filters.Liked != "all") {
+			const likedVal = filters.Liked == "liked";
+			newFilteredData = newFilteredData.filter(p => p.Liked == likedVal);
 		}
 		filteredData = newFilteredData;
 	}
@@ -66,7 +69,15 @@
 		return updateDate > readDate;
 	}
 
-	async function markPaperState(id, readState) {
+	async function markPaperReadState(paper, readState) {
+		return await markPaperState(paper, readState, paper.Liked);
+	}
+
+	async function markPaperLikedState(paper, likedState) {
+		return await markPaperState(paper, isRead(paper.DateRead), likedState);
+	}
+
+	async function markPaperState(paper, readState, likedState) {
 		const result = await fetch(UPDATE_URL, {
 			method: 'POST',
 			mode: 'cors',
@@ -76,8 +87,9 @@
 			},
 			redirect: "follow",
 			body: JSON.stringify({
-				Id: id,
-				Read: readState
+				Id: paper.Id,
+				Read: readState,
+				Liked: likedState,
 			})
 		});
 		const newItem = await result.json();
@@ -117,6 +129,14 @@
 						<option value="updated">Updated since last read</option>
 					</select>
 				</label>
+				<label for="liked">
+					Liked
+					<select id="liked" bind:value={filters.Liked} on:change="{filterData}">
+						<option value="all">All</option>
+						<option value="liked">Liked</option>
+						<option value="notliked">Not Liked</option>
+					</select>
+				</label>
 		</form>
 	</div>
 	<table>
@@ -149,7 +169,10 @@
 						</div>
 					</td>
 					<td>
-						<input on:click={() => markPaperState(wp.Id, !isRead(wp.DateRead))} type="checkbox" checked={isRead(wp.DateRead)}>
+						<div class="grid">
+							<p on:click={() => markPaperLikedState(wp, !wp.Liked)} class="heart {wp.Liked ? 'checkedheart' : ''}">❤</p>
+							<input class="checkboxalign" on:click={() => markPaperReadState(wp, !isRead(wp.DateRead))} type="checkbox" checked={isRead(wp.DateRead)}>
+						</div>
 					</td>
 				</tr>
 			{/each}
@@ -157,4 +180,31 @@
 	</table>
 </main>
 
-<style></style>
+<style>
+
+.checkboxalign {
+	margin-top: 3px;
+}
+
+.heart {
+  color: #aab8c2;
+  cursor: pointer;
+  font-size: 1.2em;
+  /*display: inline;*/
+  /*align-self: center;  */
+  /*margin-bottom: 5px;*/
+  bottom: 50px;
+  transition: color 0.2s ease-in-out;
+}
+
+.heart:hover {
+  color: grey;
+}
+
+.checkedheart {
+  color: #e2264d;
+  will-change: font-size;
+}
+
+@keyframes heart {0%, 17.5% {font-size: 0;}}
+</style>
