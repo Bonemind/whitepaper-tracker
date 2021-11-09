@@ -17,4 +17,5 @@ type Paper struct {
 	Url           string
 	Type          string
 	Title         string
+	Liked         bool
 }

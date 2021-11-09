@@ -43,8 +43,9 @@ func (c *PaperController) ListWhitepapers(w http.ResponseWriter, r *http.Request
 }
 
 type WhitepaperUpdateRequest struct {
-	Id   string
-	Read bool
+	Id    string
+	Read  bool
+	Liked bool
 }
 
 func (c *PaperController) UpdateWhitepaper(w http.ResponseWriter, r *http.Request) {
@@ -91,6 +92,9 @@ func (c *PaperController) UpdateWhitepaper(w http.ResponseWriter, r *http.Reques
 		nilTime, _ := time.Parse(DATETIME_LAYOUT, "0001-01-01T00:00:00Z")
 		paper.DateRead = nilTime
 	}
+
+	paper.Liked = wpr.Liked
+
 	result = c.Db.Save(paper)
 
 	if result.Error != nil {
