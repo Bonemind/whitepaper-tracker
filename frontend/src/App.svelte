@@ -163,7 +163,7 @@
 								<b>Type: </b>{wp.Type} <br />
 								<b>Published: </b>{wp.DatePublished.substr(0, 10)} <b>Last update: </b>{ wp.DatePublished == wp.DateUpdated ? "-" : wp.DateUpdated.substr(0, 10)}
 								{#if isRead(wp.DateRead)}
-									<br /><b>Read:</b> {wp.DatePublished.substr(0, 10)}
+									<br /><b>Read:</b> {wp.DateRead.substr(0, 10)}
 								{/if}
 							</small>
 						</div>
